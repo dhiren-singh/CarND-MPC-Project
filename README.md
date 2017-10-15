@@ -2,6 +2,55 @@
 Self-Driving Car Engineer Nanodegree Program
 
 ---
+## Model
+
+The model used is the global kinematic model, which ignores things like gravity, friction, tire properties, etc.
+
+The kinematic state is described by the position of the vehicle (_x,y_), the orientation _ψ_ and the speed _v_.
+The vector state is then (_x,y,ψ,v_).
+
+There are two actuators the steering wheel and throttle. The brake pedal and accelerator pedal are combined into
+one actuator with value between 1 and -1. 1 indicates maximum acceleration, while -1 maximum breaking. The steering
+wheel can only take the values between -25 and 25 degrees.
+
+Given the current state and the dt we can calculate the state at the next time step with the following kinematic equations:
+
+![kinematics](./kinematics.gif)
+
+The equations for errors in the next time step are:
+
+![errors](./errors.gif)
+
+
+## MPC
+
+We transformed the waypoints into vehicle space and fitted a quadratic to the waypoints.
+In order to take into account the simulated 100ms latency, I calculated the predicted state
+100ms into the future. This would be the initial state in our optimization. This included cte and epsi.
+
+I choose the delta t to be 100ms like the delay. I tried time horizons of 0.5,
+1.0, 2.0 and 3.0 seconds. 0.5 seconds was not enough to respond properly. 3.0 seconds also did not work well
+It is possible that it might have worked better with a higher degree polynomial.
+
+I tuned the parameters by trial and error these are the values that seemed to work the best.
+
+```bash
+cte_w = 1;
+epsi_w = 1;
+v_w = 1;
+delta_w = 1000;
+a_w = 50;
+ddelta_w = 1;
+da_w = 1
+```
+
+Initially I had all the weights at 1 and the vehicle was oscillating a lot.
+The delta_w weight, penalizes huge steeing angles. I played around with a few
+values of the acceleration weight and that seemed to work best.
+
+Here is a sample of the algorithm running:
+
+[![running](Thumbnail.png)](./Output-480.mov)
 
 ## Dependencies
 
